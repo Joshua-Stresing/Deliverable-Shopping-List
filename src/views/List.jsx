@@ -4,14 +4,23 @@ const startingItem = [{ id: 0, text: 'Finish your app!', done: false }];
 
 const listReducer = (state, action) => {
   switch (action.type) {
-    case 'ADD_GROCERY': {
-      const newState = [
+    case 'ADD_GROCERY':
+      return [
         { id: state.length, text: action.payload.text, done: false },
         ...state,
       ];
-      console.log(newState);
-      return newState;
-    }
+
+    case 'REMOVE':
+      return state.filter((item) => item.id !== action.payload.id);
+
+    case 'EDIT':
+      return state.map((item) => {
+        if (action.payload.id === item.id) {
+          return { ...item, item: action.payload.item };
+        }
+        return item;
+      });
+
     default:
       throw new Error('Action type ${action.type} is not supported');
   }
@@ -25,6 +34,11 @@ export default function List() {
     e.preventDefault();
     dispatchList({ type: 'ADD_GROCERY', payload: { text: grocery } });
     //^Dont forget that the state is held in memory and we can do what we want with it. We just need to supply the action^Also type is just a descriptor
+  };
+
+  const deleteItem = (id) => {
+    console.log(`delete item ${id}`);
+    dispatchList({ type: 'REMOVE', payload: { id } });
   };
 
   return (
@@ -44,7 +58,7 @@ export default function List() {
           <article key={item.id}>
             {item.text}
             <button>Edit</button>
-            <button>Delete</button>
+            <button onClick={deleteItem}>Delete</button>
           </article>
         ))}
       </div>
