@@ -16,7 +16,8 @@ const listReducer = (state, action) => {
     case 'EDIT':
       return state.map((item) => {
         if (action.payload.id === item.id) {
-          return { ...item, item: action.payload.item };
+          return action.payload;
+          // done: action.payload.done,
         }
         return item;
       });
@@ -28,12 +29,17 @@ const listReducer = (state, action) => {
 
 export default function List() {
   const [list, dispatchList] = useReducer(listReducer, startingItem);
+
   const [grocery, setGrocery] = useState('');
   //^This only works for the input on this page^
   const addItem = (e) => {
     e.preventDefault();
     dispatchList({ type: 'ADD_GROCERY', payload: { text: grocery } });
     //^Dont forget that the state is held in memory and we can do what we want with it. We just need to supply the action^Also type is just a descriptor
+  };
+
+  const editItem = (item) => {
+    dispatchList({ type: 'EDIT', payload: item });
   };
 
   const deleteItem = (id) => {
@@ -56,9 +62,29 @@ export default function List() {
       <div>
         {list.map((item) => (
           <article key={item.id}>
-            {item.text}
-            <button>Edit</button>
-            <button onClick={deleteItem}>Delete</button>
+            {!item.editing ? (
+              <>
+                {item.text}
+                <button onClick={() => editItem({ ...item, editing: true })}>
+                  Edit
+                </button>
+              </>
+            ) : (
+              <>
+                <input
+                  name="grocery"
+                  placeholder="Enter Item Here."
+                  type="text"
+                  value={item.text}
+                  onChange={(e) => editItem({ ...item, text: e.target.value })}
+                />
+                <button onClick={() => editItem({ ...item, editing: false })}>
+                  Save
+                </button>
+              </>
+            )}
+
+            <button onClick={() => deleteItem(item.id)}>Delete</button>
           </article>
         ))}
       </div>
